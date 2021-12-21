@@ -14,13 +14,15 @@ export interface UserListProps {
 }
 
 export interface QueryResult {
-    posts: Postdata[]
+    posts: [PostData];
 }
 
-export interface Postdata {
+export interface PostData {
   id: string;
   title: string;
   content: string;
+  created_at: string;
+  cover_img: string;
 }
 
 export const allPostsQuery = `
@@ -32,14 +34,14 @@ query allPosts {
   }
 }`;
 
-const PostItemContext = createContext<Postdata | undefined>(undefined);
+const PostItemContext = createContext<PostData | undefined>(undefined);
 
 export function PostItemField({
   className,
   field,
 }: {
   className?: string;
-  field?: keyof Postdata;
+  field?: keyof PostData;
 }) {
   const item = useContext(PostItemContext);
   if (!item) {
@@ -53,7 +55,7 @@ export function PostItemField({
 }
 
 export function PostList({ children, className, verbose }: UserListProps) {
-  const [data, setData] = useState<QueryResult[] | undefined>(undefined);
+  const [data, setData] = useState<QueryResult | undefined>(undefined);
   useEffect(() => {
     (async () => {
       const response = await fetch("https://depurator.duckdns.org/api", {
@@ -75,14 +77,17 @@ export function PostList({ children, className, verbose }: UserListProps) {
     })();
   }, []);
 
+  if(!data){
+    return(<>loading</>)
+  }
+else {
   return (
-    
     <div className={className} style={{ padding: "20px" }}>
-      {data?.posts.map((item, i) => (
-        <PostItemContext.Provider key={item.id} value={{...item}}>
+      {data.posts.map((item: PostData, i: Number) => (
+        <PostItemContext.Provider key={item.id} value={{ ...item }}>
           {repeatedElement(i === 0, children)}
         </PostItemContext.Provider>
       ))}
     </div>
-  );
+  );}
 }

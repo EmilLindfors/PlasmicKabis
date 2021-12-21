@@ -6,10 +6,15 @@ import React, {
   useContext,
 } from "react";
 
-export interface PostProps extends Postdata {
+export interface PostProps {
   className?: string;
   verbose?: boolean;
   children?: ReactNode;
+  id: string;
+  title: string;
+  content: string;
+  date: string;
+  image: string;
 }
 
 export interface QueryResult {
@@ -39,7 +44,52 @@ const getPostQuery = `
     }
   }`;
 
-export function singlePost({
+export function SinglePostPlasmic({ className, verbose, id, children }:{className?: string, verbose?: boolean, id?: string, children?: ReactNode}) {
+  const [data, setData] = useState<PostQueryResult | undefined>(undefined);
+  useEffect(() => {
+    (async () => {
+      const response = await fetch("https://depurator.duckdns.org/api", {
+        headers: {
+          "x-hasura-admin-secret": "Limeapelsin1",
+          "content-type": "application/json",
+        },
+        method: "POST",
+        referrer: "http://*.plasmic.app/",
+        referrerPolicy: "strict-origin-when-cross-origin",
+        body: JSON.stringify({
+          query: getPostQuery,
+          variables: { id: id },
+        }),
+        mode: "cors",
+        credentials: "omit",
+      });
+      const data = await response.json();
+      setData(data.data);
+    })();
+  }, []);
+  if (!data) {
+    return <>loading...</>;
+  } else {
+    return (
+      <div className={className}>
+        <PostContext.Provider
+          value={{
+            title: data.posts_by_pk.title,
+            content: data.posts_by_pk.content,
+            id: data.posts_by_pk.id,
+            date: data.posts_by_pk.created_at,
+            image: data.posts_by_pk.cover_img,
+          }}
+          key={id}
+        >
+          {children}
+        </PostContext.Provider>
+      </div>
+    );
+  }
+}
+
+export function SinglePost({
   className,
   verbose,
   id,
@@ -72,52 +122,11 @@ export function singlePost({
       );
     }
   } else {
-    const [data, setData] = useState<PostQueryResult | undefined>(undefined);
-    useEffect(() => {
-      (async () => {
-        const response = await fetch("https://depurator.duckdns.org/api", {
-          headers: {
-            "x-hasura-admin-secret": "Limeapelsin1",
-            "content-type": "application/json",
-          },
-          method: "POST",
-          referrer: "http://*.plasmic.app/",
-          referrerPolicy: "strict-origin-when-cross-origin",
-          body: JSON.stringify({
-            query: getPostQuery,
-            variables: { id: id },
-          }),
-          mode: "cors",
-          credentials: "omit",
-        });
-        const data = await response.json();
-        setData(data.data);
-      })();
-    }, []);
-    if (!data) {
-      return <>error</>;
-    } else {
-      return (
-        <div className={className}>
-          <PostContext.Provider
-            value={{
-              title: data.posts_by_pk.title,
-              content: data.posts_by_pk.content,
-              id: data.posts_by_pk.id,
-              date: data.posts_by_pk.created_at,
-              image: data.posts_by_pk.cover_img,
-            }}
-            key={id}
-          >
-            {children}
-          </PostContext.Provider>
-        </div>
-      );
-    }
+   return <SinglePostPlasmic className={className} id={id} verbose={verbose}>{children}</SinglePostPlasmic>
   }
 }
 
-const PostContext = createContext<Postdata | undefined>(undefined);
+const PostContext = createContext<PostProps | undefined>(undefined);
 
 function useProduct() {
   return useContext(PostContext);

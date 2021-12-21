@@ -1,7 +1,11 @@
 
+type PostHeader = {
+  title: any
+  date: any
+  className?: string
+}
 
-export default function PostHeader(props) {
-    console.log("header",props)
+export default function PostHeader(props: PostHeader) {
   return (
     <>
       <div     className={props.className}>{props.title}</div>

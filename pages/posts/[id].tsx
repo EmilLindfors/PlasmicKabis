@@ -10,8 +10,7 @@ import {
   ComponentRenderData,
   PlasmicRootProvider,
 } from "@plasmicapp/loader-react";
-import PostBody from "../../components/post-body";
-import PostHeader from '../../components/post-header'
+import { PostData } from "../../components/user-list";
 
 const getPostQuery = `
   query getPost($id: uuid!) {
@@ -24,7 +23,16 @@ const getPostQuery = `
     }
   }`;
 
-export default function Post({ post, plasmicData }) {
+
+interface PostProps {
+    id: string;
+    title: string;
+    content: string;
+    date: string;
+    image: string;
+}
+
+export default function Post({ post, plasmicData }: {post: PostProps, plasmicData: any}) {
   const router = useRouter();
   if (!router.isFallback && !post?.id) {
     return <ErrorPage statusCode={404} />;
@@ -85,7 +93,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
   const { data } = await response.json();
 
   return {
-    paths: data.posts.map((post) => ({ params: { id: post.id } })),
+    paths: data.posts.map((post: PostData) => ({ params: { id: post.id } })),
     // Turn on "fallback: 'blocking'" if you would like new paths created
     // in Plasmic to be automatically available
     fallback: false,

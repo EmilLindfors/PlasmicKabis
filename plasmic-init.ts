@@ -1,6 +1,6 @@
 import { initPlasmicLoader } from "@plasmicapp/loader-nextjs";
 import { PostList, PostItemField } from "./components/user-list";
-import { singlePost, PostTitle, PostContent, PostImage } from "./components/post";
+import { SinglePost, PostTitle, PostContent, PostImage } from "./components/post";
 import PostBody from "./components/post-body";
 import PostHeader from "./components/post-header";
 export const PLASMIC = initPlasmicLoader({
@@ -42,7 +42,7 @@ PLASMIC.registerComponent(PostItemField, {
   },
 });
 
-PLASMIC.registerComponent(singlePost, {
+PLASMIC.registerComponent(SinglePost, {
   name: "singlePost",
   displayName: "Single Post",
   props: {
